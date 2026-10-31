@@ -142,7 +142,7 @@ public class Q1Test {
           }
 
           return s1 + ", " + s2 + ", " + s3;
-     }
+     } 
 
      public static boolean trueIfFirstTravesalIsPreOrder(int[] t1, int[] t2) {
           if (t2[t2.length - 1] == t1[0]) {
