@@ -145,12 +145,57 @@ public class Q1Test {
      } 
 
      public static boolean trueIfFirstTravesalIsPreOrder(int[] t1, int[] t2) {
-          if (t2[t2.length - 1] == t1[0]) {
-               return true;
-          } else if (t1[t1.length - 1] == t2[0]) {
-               return false;
-          } else {
-               throw new RuntimeException();
+          for (int attempt = 0; attempt < 2; attempt++) {
+               int[] pre = (attempt == 0) ? t1 : t2;
+               int[] post = (attempt == 0) ? t2 : t1;
+               int n = pre.length;
+
+               // Rebuild the BST. Node i holds pre[i]; left[i] / right[i] are child indices (-1 = none).
+               int[] left = new int[n], right = new int[n];
+               Arrays.fill(left, -1);
+               Arrays.fill(right, -1);
+               for (int i = 1; i < n; i++) {
+                    int cur = 0;
+                    while (true) {
+                         if (pre[i] < pre[cur]) {
+                              if (left[cur] == -1) { left[cur] = i; break; }
+                              cur = left[cur];
+                         } else {
+                              if (right[cur] == -1) { right[cur] = i; break; }
+                              cur = right[cur];
+                         }
+                    }
+               }
+
+               // The rebuilt tree's preorder must visit nodes 0, 1, 2, ... in order;
+               // otherwise pre is not a valid BST preorder.
+               int[] stack = new int[n];
+               int top = 0, k = 0;
+               boolean validPre = true;
+               stack[top++] = 0;
+               while (top > 0) {
+                    int node = stack[--top];
+                    if (node != k++) { validPre = false; break; }
+                    if (right[node] != -1) stack[top++] = right[node];
+                    if (left[node] != -1) stack[top++] = left[node];
+               }
+               if (!validPre) continue;
+
+               // Postorder = reverse of a root-right-left traversal. Fill it from the back.
+               int[] rebuiltPost = new int[n];
+               top = 0;
+               k = n - 1;
+               stack[top++] = 0;
+               while (top > 0) {
+                    int node = stack[--top];
+                    rebuiltPost[k--] = pre[node];
+                    if (left[node] != -1) stack[top++] = left[node];
+                    if (right[node] != -1) stack[top++] = right[node];
+               }
+               if (Arrays.equals(rebuiltPost, post)) {
+                    return attempt == 0;
+               }
           }
+          throw new RuntimeException();
      }
 }
